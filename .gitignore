@@ -1,0 +1,7 @@
+data/*
+runs/*
+__pycache__
+.history
+.vscode
+.DS_Store
+
