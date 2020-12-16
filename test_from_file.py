@@ -30,7 +30,7 @@ except:
     )
 
 
-ROOT = '/cvlabdata2/home/kaicheng/pycharm/pytorch-semseg'
+ROOT = './pytorch-semseg'
 M_ROOT = "runs/"
 os.chdir(ROOT)
 

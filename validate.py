@@ -7,7 +7,7 @@ import yaml
 import torch
 import timeit
 import numpy as np
-
+import scipy.misc as misc
 from os.path import join as pjoin
 from torch.backends import cudnn
 from torch.utils import data
@@ -105,14 +105,15 @@ def validate(cfg, args, roi_only=False):
         img_norm=img_norm
     )
 
-    IPython.embed()
+    # IPython.embed()
 
     n_classes = loader.n_classes
     if roi_only:
         # assert n_classes > 2
         assert cfg['data']['void_class'] > 0
         assert loader.void_classes == cfg['data']['void_class']
-    validate_batch_size = cfg['training'].get('validate_batch_size') or cfg['training']['batch_size']
+    # validate_batch_size = cfg['training'].get('validate_batch_size') or cfg['training']['batch_size']
+    validate_batch_size=1
 
     valloader = data.DataLoader(loader,
                                 batch_size=cfg['training']['batch_size'],
@@ -135,7 +136,8 @@ def validate(cfg, args, roi_only=False):
 
     with torch.no_grad():
         if cfg['training']['loss']['name'] in ['multi_step_cross_entropy'] and cfg['model']['arch'] not in ['pspnet']:
-            for loader_type, myloader in enumerate([valloader, testloader]):
+            for loader_type, myloader in enumerate([testloader]):
+            # for loader_type, myloader in testloader:
 
                 computation_time = 0
                 img_no = 0
@@ -240,8 +242,16 @@ def validate(cfg, args, roi_only=False):
 
                         outputs_list = [output.data.cpu().numpy() for output in outputs]
 
-                    pred = [np.argmax(outputs, axis=1) for outputs in outputs_list]
-
+                    pred = [np.argmax(outputs, axis=1) for outputs in outputs_list]# list,元素数目为rnn的循环次数，每个元素大小为B*W*H
+                    out_path = args.out_path
+                    img_name = testloader.dataset.imgfiles[testloader.dataset.split][i]
+                    print(f"Save the output to : {out_path}")
+                    if args.is_recurrent:
+                        for step, output in enumerate(pred):
+                            img_path_target = os.path.join(out_path, img_name + '_step{}.png'.format(step + 1))
+                            output = np.squeeze(output, axis=0)
+                            output = misc.imresize(output, (584, 565), "nearest", mode="F")
+                            misc.imsave(img_path_target, output)
                     gt = labels.numpy()
 
                     if roi_only:

@@ -40,8 +40,7 @@ class driveLoader(data.Dataset):
         self.root = root
         self.split = split
         self.is_transform = is_transform
-        self.augmentations = None
-        # self.augmentations = augmentations
+        self.augmentations = augmentations
         self.img_norm = img_norm
         self.n_classes = 2
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)

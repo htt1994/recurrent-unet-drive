@@ -3,7 +3,12 @@
   {
     "data_path": "/tmp/home/user/data/egohands_data/"
   },
-
+  
+  "drive":
+  {
+    "data_path": "./data/DRIVE/"
+  },
+  
   "epfl_hand":
   {
     "data_path": "/cvlabdata2/home/user/data/epfl-logitech-CTI/"

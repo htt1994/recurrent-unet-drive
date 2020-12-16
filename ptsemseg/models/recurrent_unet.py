@@ -281,13 +281,13 @@ class _RecurrentUnet(nn.Module):
                 stack_inputs = torch.cat([inputs, ht], dim=1)
             else:
                 stack_inputs = inputs
-            ht, Ht = self.cell(stack_inputs, Ht)
-            h = ht
+            ht, Ht = self.cell(stack_inputs, Ht)#inputs, prev_state
+            h = ht #S(t)
             list_ht += [h]
 
         return list_ht
 
-
+# Ours-DRU
 class GeneralRecurrentUnet(_RecurrentUnet):
 
     def __init__(self, args, n_classes=2, **kwargs):

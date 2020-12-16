@@ -19,6 +19,8 @@ from ptsemseg.loader.road_loader import RoadLoader
 from ptsemseg.loader.sunrgbd_loader import SUNRGBDLoader
 from ptsemseg.loader.mapillary_vistas_loader import mapillaryVistasLoader
 from ptsemseg.loader.drive_loader import driveLoader
+# from ptsemseg.loader.drive_loader_new import driveLoader
+
 # from ptsemseg.augmentations import *
 
 def get_loader(name, roi_only=False):

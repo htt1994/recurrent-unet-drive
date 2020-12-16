@@ -11,25 +11,22 @@ data:
     path: ./data/DRIVE/
 #    path: /home/kyu/.keras/datasets/egohands_data
 training:
-    train_iters: 800 #9000
+    train_iters: 12000
     batch_size: 2
-    val_interval: 30
+    val_interval: 200
     n_workers: 1
     print_interval: 5
     optimizer:
-        # name: 'sgd'
-        # lr: 1.0e-3
-        # weight_decay: 0.0005
-        # momentum: 0.9
         name: 'adam'
         lr: 1.0e-3
+        # weight_decay: 0.0005
+        # momentum: 0.9
     loss:
         name: 'DiceLoss'
-        # name: 'multi_step_cross_entropy'
         # reduction: 'sum'
 
     lr_schedule:
         name: 'StepLR'
         lr_decay_step_size: 180
         lr_decay_factor_gamma: 0.95
-    resume: runet_drive_best_model.pkl
+    resume: rcnn2_drive_best_model.pkl

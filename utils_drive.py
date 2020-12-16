@@ -9,7 +9,7 @@ def train_parser():
         "--config",
         nargs="?",
         type=str,
-        default='configs/eythhand.yml',
+        default='configs/dataset/drive.yml',
         # unet_eythhand, vanillaRNNunet_eythhand, rcnn2_eythhand
         # unet_gteahand, rcnn2_gteahand, vanillaRNNunet_gteahand
         # rcnn2_egohand, vanillaRNNunet_egohand, unet_egohand, fcn8s_egohand, unet_hand, fcn8s_hand, psp_egohand
@@ -21,7 +21,7 @@ def train_parser():
     parser.add_argument("--prefix", nargs="?", type=str, default="", help="prefix for this run.")
     parser.add_argument("--device", nargs="?", type=str, default="cuda:0", help="GPU or CPU to use")
     parser.add_argument("--model", nargs="?", type=str, default="", help="set the model")
-    parser.add_argument("--steps", nargs="?", type=int, default=3, help="Recurrent Steps")
+    parser.add_argument("--steps", nargs="?", type=int, default=4, help="Recurrent Steps")
     parser.add_argument("--clip", nargs="?", type=float, default=10., help="gradient clip threshold")
     parser.add_argument("--hidden_size", nargs="?", type=int, default=32, help="hidden size")
     parser.add_argument("--unet_level", nargs="?", type=int, default=4, help="hidden size")
@@ -50,12 +50,12 @@ def train_parser():
 def validate_parser(parser=None):
     parser = parser if isinstance(parser, argparse.ArgumentParser) else train_parser()
     # add the parser.
-    parser.set_defaults(steps=3)
+    parser.set_defaults(steps=4)
     parser.add_argument(
         "--dataset",
         nargs="?",
         type=str,
-        default="pascal",
+        default="drive",
         help="Dataset to use ['pascal, camvid, ade20k etc']",
     )
 
@@ -64,20 +64,20 @@ def validate_parser(parser=None):
         dest='is_recurrent',
         action="store_true",
     )
-    parser.set_defaults(is_recurrent=False)
+    parser.set_defaults(is_recurrent=True)
 
     parser.add_argument(
         "--out_path",
         nargs="?",
         type=str,
-        default=None,
+        default="./data/DRIVE/test/result",
         help="Path of the output segmap",
     )
     parser.add_argument(
         "--model_path",
         nargs="?",
         type=str,
-        default="fcn8s_pascal_1_26.pkl",
+        default="runet_drive_best_model.pkl",
         help="Path to the saved model",
     )
     parser.add_argument(
