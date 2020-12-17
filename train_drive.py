@@ -251,13 +251,13 @@ def train(cfg, writer, logger, args):
                                              })
     elif cfg['data']['dataset'] in ['drive']:
         augmentations = cfg['training'].get('augmentations',
-                                            {'brightness': 63. / 255.,
-                                             'saturation': 0.5,
-                                             'contrast': 0.8,
-                                             'hflip': 0.5,
-                                             'rotate': 180,
-                                             'rscalecropsquare': 576,
-                                             })
+                                            {'brightness': 30. / 255.,
+                                                'saturation': 0.2,
+                                                'contrast': 0.2,
+                                                'hflip': 0.5,
+                                                'rotate': 180,
+                                                'rscalecropsquare': 576,
+                                                })
         # augmentations = cfg['training'].get('augmentations',
         #                                     {'rotate': 10, 'hflip': 0.5, 'rscalecrop': 512, 'gaussian': 0.5})
     else:
@@ -376,10 +376,10 @@ def train(cfg, writer, logger, args):
             # for param_group in optimizer.param_groups:
             #     print(param_group['lr'])
 
-            # # miniBatch 图像显示check
+            # # ---------------------miniBatch 图像显示check
             # bs=cfg['training']['batch_size']
             # imgs = images.numpy()
-            # imgs = np.transpose(imgs, [0, 2, 3, 1]).astype(np.uint8)
+            # imgs = np.transpose(imgs, [0, 2, 3, 1]).astype(np.uint8)#valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers)
             # f, axarr = plt.subplots(bs, 2)
             # for j in range(bs):
             #     axarr[j][0].imshow(imgs[j])
@@ -465,7 +465,17 @@ def train(cfg, writer, logger, args):
                         if args.benchmark:
                             if i_val > 10:
                                 break
-                
+
+                        # #--------------------------- miniBatch 图像显示check
+                        # bs=cfg['training']['batch_size']
+                        # imgs = images_val.numpy()
+                        # imgs = np.transpose(imgs, [0, 2, 3, 1]).astype(np.uint8)
+                        # f, axarr = plt.subplots(bs, 2)
+                        # for j in range(bs):
+                        #     axarr[j][0].imshow(imgs[j])
+                        #     axarr[j][1].imshow(labels_val.numpy()[j])
+                        # plt.show()
+
                         images_val = images_val.to(device)
                         labels_val = labels_val.to(device)
                         if cfg['model']['arch'] in ['reclast']:

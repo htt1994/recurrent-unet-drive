@@ -23,16 +23,16 @@ def train_parser():
     parser.add_argument("--model", nargs="?", type=str, default="", help="set the model")
     parser.add_argument("--steps", nargs="?", type=int, default=4, help="Recurrent Steps")
     parser.add_argument("--clip", nargs="?", type=float, default=10., help="gradient clip threshold")
-    parser.add_argument("--hidden_size", nargs="?", type=int, default=32, help="hidden size")
-    parser.add_argument("--unet_level", nargs="?", type=int, default=4, help="hidden size")
-    parser.add_argument("--recurrent_level", nargs="?", type=int, default=-1, help="hidden size")
-    parser.add_argument("--gate", nargs="?", type=int, default=2, help="GRU gate number, 2 or 3")
+    parser.add_argument("--hidden_size", nargs="?", type=int, default=32, help="hidden size")#32
+    parser.add_argument("--unet_level", nargs="?", type=int, default=4, help="unet_level")
+    parser.add_argument("--recurrent_level", nargs="?", type=int, default=-1, help="recurrent_level")
+    parser.add_argument("--gate", nargs="?", type=int, default=3, help="GRU gate number, 2 or 3")#2
     parser.add_argument("--initial", nargs="?", type=int, default=1, help="initial value of hidden state")
     parser.add_argument("--scale_weight", nargs="?", type=float, default=-1., help="loss decay after recurrent steps")
     parser.add_argument("--feature_scale", nargs="?", type=int, default=4, help="scale of feature.")
     parser.add_argument("--lr", nargs="?", type=float, default=-1, help="learning rate")
     parser.add_argument("--loss", nargs="?", type=str, default="multi_step_cross_entropy",
-                        help="loss decay after recurrent steps")
+                        help="loss decay after recurrent steps")#
     parser.add_argument('--structure', nargs="?", type=str, default='ours', help='if gru or dru')
     parser.add_argument("--batch_size", nargs="?", type=int, default=0, help="batch size")
     parser.add_argument("--lr_n", nargs="?", type=int, default=0, help="learning rate n")

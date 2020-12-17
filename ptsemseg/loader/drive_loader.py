@@ -40,8 +40,8 @@ class driveLoader(data.Dataset):
         self.root = root
         self.split = split
         self.is_transform = is_transform
-        self.augmentations = None
-        # self.augmentations = augmentations
+        # self.augmentations = None
+        self.augmentations = augmentations
         self.img_norm = img_norm
         self.n_classes = 2
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
@@ -137,10 +137,11 @@ class driveLoader(data.Dataset):
         lbl = Image.fromarray(np.array(lbl, dtype=np.uint8))
 
         if self.augmentations is not None:
-            img, lbl = self.augmentations(img, lbl)
+            if np.random.random() < 0.4:
+                img, lbl = self.augmentations(img, lbl)
 
-        if self.is_transform:
-            img, lbl = self.transform(img, lbl)
+        # if self.is_transform:
+        img, lbl = self.transform(img, lbl)
 
         return img, lbl
 
@@ -161,24 +162,30 @@ class driveLoader(data.Dataset):
 
         # img = self.tf(img)
         img = np.array(img).astype(int)
-
         img = np.transpose(img, [2, 0, 1])
-        img = torch.from_numpy(img).float()
-        
 
+        img = torch.from_numpy(img).float()
+
+        # imgs = img.numpy()
+        # plt.imshow(np.transpose(imgs, [1, 2, 0]))
+        # # plt.imshow(lbl)
+        # plt.show()
+
+        
         lbl = np.array(lbl).astype(int)
         # lbl = lbl.astype(int)
         if not np.all(classes == np.unique(lbl)):
             print("WARN: resizing labels yielded fewer classes")
 
-        if not np.all(np.unique(lbl[lbl != self.ignore_index]) < self.n_classes):
+        if not np.all( np.unique(lbl[lbl != self.ignore_index]) < self.n_classes ):
             print("after det", classes, np.unique(lbl))
             raise ValueError("Segmentation map contained invalid class values")
 
         lbl = torch.from_numpy(lbl).long()
         
-        # imgs = img.numpy().astype(np.uint8)
+        # imgs = img.numpy()
         # plt.imshow(np.transpose(imgs, [1, 2, 0]))
+        # # plt.imshow(lbl)
         # plt.show()
         return img, lbl
 
@@ -209,16 +216,17 @@ class driveLoader(data.Dataset):
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     crop_size = 576
-    fill = 250
+    # fill = 250
     # augmentations = Compose([Scale(2048), RandomRotate(10), RandomHorizontallyFlip(0.5), RandomGaussianBlur])
     # augmentations = Compose([RandomScaleCrop(crop_size, fill), RandomRotate(10), RandomHorizontallyFlip(0.5)])
-    augmentations = {'brightness': 63. / 255.,
-                     'saturation': 0.5,
-                     'contrast': 0.8,
-                     'hflip': 0.5,
-                     'rotate': 10,
-                     'rscalecropsquare': 576,
-                     }
+    augmentations = cfg['training'].get('augmentations',
+                                        {'brightness': 30. / 255.,
+                                            'saturation': 0.2,
+                                            'contrast': 0.2,
+                                            'hflip': 0.5,
+                                            'rotate': 180,
+                                            'rscalecropsquare': 576,
+                                            })
     data_aug = get_composed_augmentations(augmentations)
     local_path = '/data/DRIVE/'
     dst = driveLoader(local_path, img_size=576, is_transform=True,

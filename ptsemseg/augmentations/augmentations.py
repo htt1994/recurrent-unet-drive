@@ -359,7 +359,7 @@ class ToTensor(object):
 
 
 class RandomScaleCropSquare(object):
-    def __init__(self, crop_size, fill=250):
+    def __init__(self, crop_size, fill=0):
         self.crop_size = crop_size
         self.fill = fill
 
@@ -367,7 +367,7 @@ class RandomScaleCropSquare(object):
         # random scale (short edge)
         w, h = img.size
         base_size = np.min([w, h])
-        short_size = random.randint(int(base_size * 0.5), int(base_size * 2.0))
+        short_size = random.randint(int(base_size * 0.9), int(base_size * 1.1))
         if h > w:
             ow = short_size
             oh = int(1.0 * h * ow / w)
