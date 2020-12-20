@@ -46,7 +46,7 @@ class UnetDecoder(nn.Module):
         :param inputs: conv_outputs, center from decoder.
         :return:
         """
-        conv_outputs, center = inputs
+        conv_outputs = inputs
         up_output = [center]
         for i in range(self.feature_level):
             b = self.feature_level - i - 1

@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from .utils import unetConv2, unetConv1
-from .unet import UnetEncoder, UnetDecoder, GeneralUNet_v2
+from .unet import UnetEncoder, UnetDecoder, GeneralUNet_v2,unet
 
 
 def init_hidden_state(layer, prev_h, prev_state, out_size, hidden_size, batch_size, spatial_size):
@@ -240,11 +240,11 @@ class RecurrentUNetCell(nn.Module):
         """
         # init
 
-        conv_outputs, pools_outputs = self.encoder(inputs)
-        center, next_state = self.gru(pools_outputs[-1], prev_state=prev_state)
-        output = self.decoder([conv_outputs, center])
+        conv_outputs, pools_outputs = self.encoder(inputs)# B*(C+iteOutput)*W*H
+        # center, next_state = self.gru(pools_outputs[-1], prev_state=prev_state)
+        output = self.decoder(conv_outputs)
 
-        return output, next_state
+        return output
 
     def __repr__(self):
         a = 'RecurrentUNet CELL general \n'
@@ -265,6 +265,7 @@ class _RecurrentUnet(nn.Module):
         self.hidden_size = args.hidden_size
         self.n_classes = n_classes
         self.cell = None
+        self.unet=None
         self.is_input_stack = True
 
     def forward(self, inputs):
@@ -274,14 +275,15 @@ class _RecurrentUnet(nn.Module):
         batch_size = inputs.data.size()[0]
         spatial_size = inputs.data.size()[2:]
 
-        ht, _ = init_hidden_state(self, None, None, self.n_classes, self.hidden_size, batch_size, spatial_size)
+        ht, _ = init_hidden_state(self, None, None, self.n_classes-1, self.hidden_size, batch_size, spatial_size)
         Ht = None
         for i in range(self.rnn_steps):
             if self.is_input_stack:
                 stack_inputs = torch.cat([inputs, ht], dim=1)
             else:
                 stack_inputs = inputs
-            ht, Ht = self.cell(stack_inputs, Ht)#inputs, prev_state
+            # ht, Ht = self.cell(stack_inputs, Ht)#inputs, prev_state
+            ht = self.unet(stack_inputs)#inputs, prev_state
             h = ht #S(t)
             list_ht += [h]
 
@@ -304,6 +306,12 @@ class GeneralRecurrentUnet(_RecurrentUnet):
             is_batchnorm=True,
             is_input_stack=True,
         )
+        self.unet=unet(
+            feature_scale=args.feature_scale,
+            n_classes=n_classes,
+            is_deconv=True,
+            in_channels=self.input_size + n_classes-1, 
+            is_batchnorm = True)
 
         self.is_input_stack = True
 

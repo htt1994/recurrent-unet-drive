@@ -123,7 +123,7 @@ def validate(cfg, args, roi_only=False):
                                  batch_size=validate_batch_size,
                                  num_workers=8)
 
-    if cfg['training']['loss']['name'] in ['multi_step_cross_entropy'] and cfg['model']['arch'] not in ['pspnet']:
+    if cfg['training']['loss']['name'] in ['multi_step_cross_entropy','multi_step_DiceLoss'] and cfg['model']['arch'] not in ['pspnet']:
         running_metrics = None
     else:
         running_metrics = runningScore(n_classes, void=is_void_class) if not roi_only else \
@@ -135,7 +135,7 @@ def validate(cfg, args, roi_only=False):
     logger.info("Loading model {} from {}".format(cfg['model']['arch'], model_path))
 
     with torch.no_grad():
-        if cfg['training']['loss']['name'] in ['multi_step_cross_entropy'] and cfg['model']['arch'] not in ['pspnet']:
+        if cfg['training']['loss']['name'] in ['multi_step_cross_entropy','multi_step_DiceLoss'] and cfg['model']['arch'] not in ['pspnet']:
             for loader_type, myloader in enumerate([testloader]):
             # for loader_type, myloader in testloader:
 
@@ -242,14 +242,23 @@ def validate(cfg, args, roi_only=False):
 
                         outputs_list = [output.data.cpu().numpy() for output in outputs]
 
-                    pred = [np.argmax(outputs, axis=1) for outputs in outputs_list]# list,元素数目为rnn的循环次数，每个元素大小为B*W*H
+                    # pred = [np.argmax(outputs, axis=1) for outputs in outputs_list]# list,元素数目为rnn的循环次数，每个元素大小为B*W*H
+                    pred = []
+                    for outputs in outputs_list:
+                        outputs[outputs>=0.5]=1
+                        outputs[outputs<0.5]=0
+                        outputs = np.squeeze(outputs,axis=0)
+                        pred.append(outputs)
+
                     out_path = args.out_path
                     img_name = testloader.dataset.imgfiles[testloader.dataset.split][i]
                     print(f"Save the output to : {out_path}")
                     if args.is_recurrent:
                         for step, output in enumerate(pred):
                             img_path_target = os.path.join(out_path, img_name + '_step{}.png'.format(step + 1))
-                            output = np.squeeze(output, axis=0)
+                            output = np.squeeze(output)
+                            
+                            
                             output = misc.imresize(output, (584, 565), "nearest", mode="F")
                             misc.imsave(img_path_target, output)
                     gt = labels.numpy()
@@ -278,7 +287,7 @@ def validate(cfg, args, roi_only=False):
                                 running_metrics = running_metrics + [runningScore(n_classes, void=is_void_class)
                                                                      if not roi_only else runningScore(n_classes + 1, roi_only)]
                         else:
-                            running_metrics[k].update(gt, pred[k], step=k)
+                            running_metrics[k].update(gt, pred[k].astype(int), step=k)
                             if update_raw and k == len(pred) - 1:
                                 running_metrics[k].update_raw(gt, outputs_list[k], step=k)
 

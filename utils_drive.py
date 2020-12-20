@@ -31,8 +31,8 @@ def train_parser():
     parser.add_argument("--scale_weight", nargs="?", type=float, default=-1., help="loss decay after recurrent steps")
     parser.add_argument("--feature_scale", nargs="?", type=int, default=4, help="scale of feature.")
     parser.add_argument("--lr", nargs="?", type=float, default=-1, help="learning rate")
-    parser.add_argument("--loss", nargs="?", type=str, default="multi_step_cross_entropy",
-                        help="loss decay after recurrent steps")#
+    parser.add_argument("--loss", nargs="?", type=str, default="multi_step_DiceLoss",
+                        help="loss decay after recurrent steps")#multi_step_cross_entropy
     parser.add_argument('--structure', nargs="?", type=str, default='ours', help='if gru or dru')
     parser.add_argument("--batch_size", nargs="?", type=int, default=0, help="batch size")
     parser.add_argument("--lr_n", nargs="?", type=int, default=0, help="learning rate n")

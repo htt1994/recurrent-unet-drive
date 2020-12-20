@@ -431,7 +431,7 @@ def train(cfg, writer, logger, args):
             else:
                 outputs = model(images)
 
-            loss = loss_fn(input=outputs, target=labels, weight=weight, bkargs=args)
+            loss = loss_fn(outputs, labels)
             loss.backward()
 
             # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
@@ -520,10 +520,14 @@ def train(cfg, writer, logger, args):
 
                         else:
                             outputs = model(images_val)
-                        val_loss = loss_fn(input=outputs, target=labels_val, bkargs=args)
+                        val_loss = loss_fn(input=outputs, target=labels_val)
 
                         if cfg['training']['loss']['name'] in ['multi_step_cross_entropy']:
                             pred = outputs[-1].data.max(1)[1].cpu().numpy()
+                        elif cfg['training']['loss']['name'] in ['multi_step_DiceLoss']:
+                            pred = outputs[-1].data.cpu().numpy()
+                            pred[pred>=0.5]=1
+                            pred[pred<0.5]=0
                         else:
                             pred = outputs.data.max(1)[1].cpu().numpy()
                         gt = labels_val.data.cpu().numpy()
@@ -539,7 +543,7 @@ def train(cfg, writer, logger, args):
 
                         logger.debug('pred shape: ', pred.shape, '\t ground-truth shape:',gt.shape)
                         # IPython.embed()
-                        running_metrics_val.update(gt, pred)
+                        running_metrics_val.update(gt, pred.astype(int))
                         val_loss_meter.update(val_loss.item())
                     # assert i_val > 0, "Validation dataset is empty for no reason."
                 torch.backends.cudnn.benchmark = True

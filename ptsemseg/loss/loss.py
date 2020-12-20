@@ -16,11 +16,11 @@ def cross_entropy2d(input, target, weight=None, reduction='sum', bkargs=None):
     )
     return loss
 
-class DiceLoss(nn.Module):
-    def __init__(self):
-        super(DiceLoss, self).__init__()
+def DiceLoss(input, target):
+    # def __init__(self):
+    #     super(DiceLoss, self).__init__()
 
-    def	forward(self, input, target):
+    # def	forward(self, input, target):
         N = target.size(0)
         smooth = 1
         input_flat = input.view(N, -1).float()
@@ -29,6 +29,15 @@ class DiceLoss(nn.Module):
  
         loss = 2 * (intersection.sum(1) + smooth) / (input_flat.sum(1) + target_flat.sum(1) + smooth)
         loss = 1 - loss.sum() / N
+ 
+        return loss
+
+class multi_step_DiceLoss(nn.Module):
+    def __init__(self):
+        super(multi_step_DiceLoss, self).__init__()
+
+    def	forward(self, input, target):
+        loss=(DiceLoss(input[0], target)+2*DiceLoss(input[1], target)+3*DiceLoss(input[2], target)+3*DiceLoss(input[3], target))/9
  
         return loss
 
