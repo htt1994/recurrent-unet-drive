@@ -37,7 +37,7 @@ class multi_step_DiceLoss(nn.Module):
         super(multi_step_DiceLoss, self).__init__()
 
     def	forward(self, input, target):
-        loss=(DiceLoss(input[0], target)+2*DiceLoss(input[1], target)+3*DiceLoss(input[2], target)+3*DiceLoss(input[3], target))/9
+        loss=(DiceLoss(F.sigmoid(input[0]), target)+2*DiceLoss(F.sigmoid(input[1]), target)+3*DiceLoss(F.sigmoid(input[2]), target)+3*DiceLoss(F.sigmoid(input[3]), target))/9
  
         return loss
 

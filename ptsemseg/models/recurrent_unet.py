@@ -474,3 +474,125 @@ class UNetWithGRU_old(_RecurrentUnet):
 
         return list_ht
 
+
+class con_block(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(con_block, self).__init__()
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_ch, out_ch, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_ch, out_ch, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True))
+    def forward(self, x):
+        x = self.conv(x)
+        return x
+
+class up_conv(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(up_conv, self).__init__()
+        # self.up = nn.Sequential(
+        #     # nn.Upsample(scale_factor=2),
+        #     # nn.Conv2d(in_ch, out_ch, kernel_size=3, stride=1, padding=1),
+        #     nn.ConvTranspose2d(in_ch, out_ch, kernel_size=2, stride=2)
+        #     nn.BatchNorm2d(out_ch),
+        #     nn.ReLU(inplace=True))
+        self.up =nn.ConvTranspose2d(in_ch, out_ch, kernel_size=2, stride=2)
+    def forward(self, x):
+        x = self.up(x)
+        return x
+
+class myUnet(nn.Module):
+    def __init__(self, img_ch=1, output_ch=1):
+        super(myUnet, self).__init__()
+        n1 = 8
+        filters = [n1, n1 * 2, n1 * 4, n1 * 8, n1 * 16]
+
+        self.Maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.Maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.Maxpool3 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.MaxPool4 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.conv1 = con_block(img_ch, filters[0])
+        self.conv2 = con_block(filters[0], filters[1])
+        self.conv3 = con_block(filters[1], filters[2])
+        self.conv4 = con_block(filters[2], filters[3])
+        self.conv5 = con_block(filters[3], filters[4])
+
+        self.Up5 = up_conv(filters[4], filters[3])
+        self.Up_conv5 = con_block(filters[4], filters[3])
+
+        self.Up4 = up_conv(filters[3], filters[2])
+        self.Up_conv4 = con_block(filters[3], filters[2])
+
+        self.Up3 = up_conv(filters[2], filters[1])
+        self.Up_conv3 = con_block(filters[2], filters[1])
+        
+        self.Up2 = up_conv(filters[1], filters[0])
+        self.Up_conv2 = con_block(filters[1], filters[0])
+
+        self.Conv = nn.Conv2d(filters[0], output_ch, kernel_size=1, stride=1, padding=0)
+
+    def forward(self, x):
+        e1 = self.conv1(x)
+
+        e2 = self.Maxpool1(e1)
+        e2 = self.conv2(e2)
+
+        e3 = self.Maxpool2(e2)
+        e3 = self.conv3(e3)
+
+        e4 = self.Maxpool3(e3)
+        e4 = self.conv4(e4)
+        
+        e5 = self.MaxPool4(e4)
+        e5 = self.conv5(e5)
+
+        d5 = self.Up5(e5)
+        d5 = torch.cat([e4, d5], dim=1)
+        d5 = self.Up_conv5(d5)
+
+        d4 = self.Up4(d5)
+        d4 = torch.cat((e3, d4), dim=1)
+        d4 = self.Up_conv4(d4)
+
+        d3 = self.Up3(d4)
+        d3 = torch.cat((e2, d3), dim=1)
+        d3 = self.Up_conv3(d3)
+        
+        d2 = self.Up2(d3)
+        d2 = torch.cat((e1, d2), dim=1)
+        d2 = self.Up_conv2(d2)
+        
+        d1 = self.Conv(d2)
+
+        # out = nn.Sigmoid()(d1)
+        out=d1
+
+        return out
+
+class JointSegCTLDireNetRecurrent(nn.Module):
+    def __init__(self, img_ch=2, output_ch=1,dire_classes=19):
+        super(JointSegCTLDireNetRecurrent, self).__init__()
+        self.rnn_steps = 4
+        self.unet=myUnet(img_ch,output_ch)
+
+    def forward(self, x):
+        # dt=[]
+        # dire=[]
+        list_seg = []
+        tempSeg=Variable(torch.zeros(x.size()[0],1,x.size()[2],x.size()[3])).cuda()
+        for i in range(self.rnn_steps):
+            
+            stack_inputs = torch.cat([x, tempSeg], dim=1)            
+            seg = self.unet(stack_inputs)
+
+            # tempSeg=F.sigmoid(seg)
+            tempSeg=seg
+            list_seg+=[seg]
+
+
+        return list_seg
+

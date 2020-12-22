@@ -371,7 +371,7 @@ def train(cfg, writer, logger, args):
         for (images, labels) in trainloader:
             i += 1
             start_ts = time.time()
-            scheduler.step()
+            # scheduler.step()
             model.train()
             # for param_group in optimizer.param_groups:
             #     print(param_group['lr'])
@@ -437,8 +437,9 @@ def train(cfg, writer, logger, args):
             # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
             # if use_grad_clip(cfg['model']['arch']):  #
             # if cfg['model']['arch'] in ['rcnn', 'rcnn2', 'rcnn3']:  #
-            if use_grad_clip(cfg['model']['arch']):
-                nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+
+            # if use_grad_clip(cfg['model']['arch']):
+            #     nn.utils.clip_grad_norm_(model.parameters(), args.clip)
 
             optimizer.step()
 

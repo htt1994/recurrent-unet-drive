@@ -82,7 +82,7 @@ def get_model(model_dict, n_classes, args, version=None):
     elif name == 'deeplabv3':
         model = model(n_classes=n_classes, backbone='resnet')
     else:
-        model = model(n_classes=n_classes, **param_dict)
+        model = model(img_ch=4)
 
     return model
 
@@ -136,7 +136,8 @@ def _get_model_instance(name):
             "frrnA": frrn,
             "frrnB": frrn,
             'deeplabv3': DeepLab,
-            "refinenet": rf101
+            "refinenet": rf101,
+            "JointSegCTLDireNetRecurrent":JointSegCTLDireNetRecurrent
         }[name]
     except:
         raise("Model {} not available".format(name))

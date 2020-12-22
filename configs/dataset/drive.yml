@@ -1,5 +1,5 @@
 model:
-    arch: runet
+    arch: JointSegCTLDireNetRecurrent #runet
 data:
     dataset: drive
     train_split: train
@@ -11,7 +11,7 @@ data:
     path: ./data/DRIVE/
 #    path: /home/kyu/.keras/datasets/egohands_data
 training:
-    train_iters: 1000 #9000
+    train_iters: 600 #9000
     batch_size: 2
     val_interval: 30
     n_workers: 1
@@ -32,4 +32,4 @@ training:
         name: 'StepLR'
         lr_decay_step_size: 180
         lr_decay_factor_gamma: 0.95
-    resume: runet_drive_best_model.pkl
+    resume: JointSegCTLDireNetRecurrent_drive_best_model.pkl
