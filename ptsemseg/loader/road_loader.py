@@ -11,7 +11,7 @@ import glob
 
 from PIL import Image
 # from scipy.misc import imread
-from scipy.ndimage import imread
+from imageio import imread
 from tqdm import tqdm
 from torch.utils import data
 from torchvision import transforms

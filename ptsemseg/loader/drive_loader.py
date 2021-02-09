@@ -1,7 +1,10 @@
 import os
 import torch
 import numpy as np
+from PIL import Image
+from skimage import io
 import scipy.misc as m
+# from scipy.misc import imageio
 from os.path import join as pjoin
 from torch.utils import data
 from torchvision import transforms
@@ -114,9 +117,9 @@ class driveLoader(data.Dataset):
         lbl_path = pjoin(path, "1st_manual/" + lbl_name)
         mask_path = pjoin(path, "mask/" + mask_name)
 
-        img = m.imread(img_path)
-        lbl = m.imread(lbl_path)
-        mask = m.imread(mask_path)
+        img = io.imread(img_path)
+        lbl = io.imread(lbl_path)
+        mask = io.imread(mask_path)
 
 
         lbl = np.array(lbl)
@@ -157,8 +160,10 @@ class driveLoader(data.Dataset):
         if self.img_size == ('same', 'same'):
             pass
         else:
-            img = m.imresize(img, (self.img_size[0], self.img_size[1]))  # uint8 with RGB mode
-            lbl = m.imresize(lbl, (self.img_size[0], self.img_size[1]), "nearest", mode="F")
+            img = img.resize((self.img_size[0],self.img_size[1]))
+            lbl = lbl.resize((self.img_size[0],self.img_size[1]))
+            # img = m.imresize(img, (self.img_size[0], self.img_size[1]))  # uint8 with RGB mode
+            # lbl = m.imresize(lbl, (self.img_size[0], self.img_size[1]), "nearest", mode="F")
 
         # img = self.tf(img)
         img = np.array(img).astype(int)

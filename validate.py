@@ -4,10 +4,12 @@ import random
 import argparse
 import IPython
 import yaml
+from PIL import Image
 import torch
 import timeit
 import numpy as np
 import scipy.misc as misc
+from imageio import imwrite
 from os.path import join as pjoin
 from torch.backends import cudnn
 from torch.utils import data
@@ -257,10 +259,11 @@ def validate(cfg, args, roi_only=False):
                         for step, output in enumerate(pred):
                             img_path_target = os.path.join(out_path, img_name + '_step{}.png'.format(step + 1))
                             output = np.squeeze(output)
-                            
-                            
-                            output = misc.imresize(output, (584, 565), "nearest", mode="F")
-                            misc.imsave(img_path_target, output)
+                            # img = np.array(Image.fromarray(myImage).resize((num_px,num_px)))
+                            # output = output.resize((584, 565))
+                            img = np.array(Image.fromarray(output).resize((584, 565)))
+                            # output = misc.imresize(output, (584, 565), "nearest", mode="F")
+                            imwrite(img_path_target, output)
                     gt = labels.numpy()
 
                     if roi_only:
